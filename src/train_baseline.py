@@ -21,11 +21,11 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Train baseline CNN on FER-2013 (folder-based)")
     parser.add_argument("--train_dir", type=str, default="data/train")
     parser.add_argument("--test_dir", type=str, default="data/test")
-    parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--epochs", type=int, default=5)
-    parser.add_argument("--lr", type=float, default=1e-3)
+    parser.add_argument("--batch_size", type=int, default=128)
+    parser.add_argument("--epochs", type=int, default=50)
+    parser.add_argument("--lr", type=float, default=0.01)
     parser.add_argument("--weight_decay", type=float, default=1e-4)
-    parser.add_argument("--optimizer", type=str, default="adamw", choices=["adamw", "sgd", "sgd_nesterov"])
+    parser.add_argument("--optimizer", type=str, default="sgd_nesterov", choices=["adamw", "sgd", "sgd_nesterov"])
     parser.add_argument("--patience", type=int, default=5)
     parser.add_argument(
         "--checkpoint_dir",
@@ -44,7 +44,7 @@ def parse_args():
         action="store_true",
         help="Enable automatic mixed precision when CUDA is available",
     )
-    parser.add_argument("--num_workers", type=int, default=4)
+    parser.add_argument("--num_workers", type=int, default=2)
     parser.add_argument("--dropout_p", type=float, default=0.5)
     parser.add_argument("--val_ratio", type=float, default=0.2)
     parser.add_argument(
@@ -220,6 +220,9 @@ def main():
         print("Using WeightedRandomSampler for balanced training batches.")
 
     model = BaselineCNN(num_classes=num_classes, dropout_p=args.dropout_p).to(device)
+    # Print total params for visibility and sanity-check
+    total_params = sum(p.numel() for p in model.parameters())
+    print(f"Model: BaselineCNN | Total params: {total_params:,}")
 
     # Class weights for imbalance using train_loader subset (can be disabled)
     class_counts = np.bincount(train_loader.dataset.targets, minlength=num_classes)
@@ -235,7 +238,7 @@ def main():
     optimizer = build_optimizer(model, args.optimizer, args.lr, args.weight_decay)
     # Scheduler mode depends on monitor
     sched_mode = "max" if args.monitor == "val_acc" else "min"
-    scheduler = ReduceLROnPlateau(optimizer, mode=sched_mode, factor=0.5, patience=2)
+    scheduler = ReduceLROnPlateau(optimizer, mode=sched_mode, factor=0.75, patience=5)
 
     # Setup AMP scaler if requested and CUDA available
     use_amp = args.use_amp and torch.cuda.is_available()

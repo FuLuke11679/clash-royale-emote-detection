@@ -74,7 +74,7 @@ data/test/<emotion>/*.jpg
 
 Classes:
 
-angry, disgust, fear, happy, neutral, sad
+angry, disgust, fear, happy, neutral, sad, surprise
 
 
 Augmentations include:
@@ -167,6 +167,7 @@ fear	fear.png
 happy	happy.png
 neutral	neutral.png
 sad	sad.png
+surprise surprise.png
 ## 🧩 Rubric Items Satisfied (High-Level)
 
 ✔ Modular code design

@@ -15,9 +15,9 @@ import matplotlib.pyplot as plt
 
 from sklearn.metrics import accuracy_score, f1_score
 
-from data.fer_dataset import get_dataloaders
-from data.fer_dataset import NUM_CLASSES
-from models.resnet_emotion import EmotionResNet
+from src.data.fer_dataset import get_dataloaders
+from src.data.fer_dataset import NUM_CLASSES
+from src.models.resnet_emotion import EmotionResNet
 
 
 def parse_args():
@@ -139,17 +139,22 @@ def main():
         val_ratio=args.val_ratio,
     )
 
+    # Infer number of classes from the dataset to avoid mismatch with CLASS_NAMES constant
+    num_classes = len(train_loader.dataset.classes)
+    if num_classes != NUM_CLASSES:
+        print(f"[WARN] Dataset contains {num_classes} classes but NUM_CLASSES={NUM_CLASSES}. Using inferred value {num_classes}.")
+
     model = EmotionResNet(
         backbone=args.backbone,
-        num_classes=NUM_CLASSES,
+        num_classes=num_classes,
         pretrained=True,
         dropout_p=args.dropout_p,
     ).to(device)
 
     # Class weights for imbalance using train_loader subset
-    class_counts = np.bincount(train_loader.dataset.targets, minlength=NUM_CLASSES)
+    class_counts = np.bincount(train_loader.dataset.targets, minlength=num_classes)
     class_weights = 1.0 / (class_counts + 1e-6)
-    class_weights = class_weights / class_weights.sum() * NUM_CLASSES
+    class_weights = class_weights / class_weights.sum() * num_classes
     class_weights = torch.tensor(class_weights, dtype=torch.float32).to(device)
 
     criterion = nn.CrossEntropyLoss(weight=class_weights)

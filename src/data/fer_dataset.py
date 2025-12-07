@@ -14,7 +14,7 @@ from torchvision.datasets import ImageFolder
 
 # If your folders are exactly: angry, disgust, fear, happy, neutral, sad
 # this will match ImageFolder's alphabetical ordering.
-CLASS_NAMES = ["angry", "disgust", "fear", "happy", "neutral", "sad"]
+CLASS_NAMES = ["angry", "disgust", "fear", "happy", "neutral", "sad", "surprise"]
 NUM_CLASSES = len(CLASS_NAMES)
 
 

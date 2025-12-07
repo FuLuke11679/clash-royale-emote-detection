@@ -233,7 +233,7 @@ python -m src.realtime_demo --checkpoint_path models/checkpoints/best_resnet.pt 
 
 Defined in:
 
-CLASS_NAMES = ["angry","disgust","fear","happy","neutral","sad"]
+CLASS_NAMES = ["angry","disgust","fear","happy","neutral","sad", "surprise"]
 
 ✔ Any preprocessing changes must propagate to realtime demo
 
